@@ -12,6 +12,7 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace HotelListing
@@ -42,6 +43,8 @@ namespace HotelListing
                                .AllowAnyMethod()
                                .AllowAnyHeader());
             });
+
+            services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
             services.AddSwaggerGen(c =>
             {
