@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace HotelListing.Models
 {
@@ -11,6 +12,8 @@ namespace HotelListing.Models
 
         [ForeignKey(nameof(Country))]
         public int CountryId { get; set; }
+
+        [JsonIgnore] //This is done to avoid cyclic dependency
         public Country Country { get; set; }
     }
 }
