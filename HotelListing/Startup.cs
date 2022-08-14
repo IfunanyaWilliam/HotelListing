@@ -1,6 +1,7 @@
 using HotelListing.Contracts;
 using HotelListing.Data;
 using HotelListing.Repository;
+using HotelListing.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -35,7 +36,13 @@ namespace HotelListing
                 options.UseSqlServer(Configuration.GetConnectionString("SqlConnection"))
             );
 
+            services.AddAuthentication();
+
+            //bring in the ServiceExtension class
+            services.ConfigureIdentity();
             services.AddControllers();
+
+
 
             //Add configuration for Cores
             services.AddCors(o =>
