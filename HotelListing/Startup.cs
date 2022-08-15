@@ -39,7 +39,9 @@ namespace HotelListing
             services.AddAuthentication();
 
             //bring in the ServiceExtension class
-            services.ConfigureIdentity();
+            ServiceExtensions.ConfigureIdentity(services);
+
+
             services.AddControllers();
 
 
