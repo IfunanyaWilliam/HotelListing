@@ -43,7 +43,7 @@ namespace HotelListing.Controllers
             {
                 var user = _mapper.Map<ApiUser>(userDto);
                 user.UserName = userDto.Email;
-                var result = await _userManager.CreateAsync(user);
+                var result = await _userManager.CreateAsync(user, userDto.Password);
 
                 if (!result.Succeeded)
                 {
@@ -55,6 +55,7 @@ namespace HotelListing.Controllers
                     return BadRequest(ModelState);
                 }
 
+                await _userManager.AddToRolesAsync(user, userDto.Roles);
                 return Accepted();
             }
             catch (Exception ex)

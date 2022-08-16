@@ -37,6 +37,8 @@ namespace HotelListing
             );
 
             services.AddAuthentication();
+            services.ConfigureIdentity();
+            services.ConfigureJWT(Configuration);
 
             //bring in the ServiceExtension class
             ServiceExtensions.ConfigureIdentity(services);

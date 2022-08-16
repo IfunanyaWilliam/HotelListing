@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace HotelListing.RoleConfiguration
+namespace HotelListing.IdentityConfigurations
 {
     public class RoleConfiguration : IEntityTypeConfiguration<IdentityRole>
     {
@@ -24,3 +24,4 @@ namespace HotelListing.RoleConfiguration
         }
     }
 }
+ 
