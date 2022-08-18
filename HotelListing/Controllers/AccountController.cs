@@ -20,10 +20,12 @@ namespace HotelListing.Controllers
         private readonly IMapper _mapper;
 
         public AccountController(UserManager<ApiUser> userManager,
+                                 //SignInManager<ApiUser> signInManager,
                                  ILogger<AccountController> logger,
                                  IMapper mapper)
         {
             _userManager = userManager;
+            //_signInManager = signInManager;
             _logger = logger;
             _mapper = mapper;
         }
@@ -76,7 +78,7 @@ namespace HotelListing.Controllers
 
         //    try
         //    {
-        //        var result = await _signInManager.PasswordSignInAsync(loginDto.Email, loginDto.Password, false, false );
+        //        var result = await _signInManager.PasswordSignInAsync(loginDto.Email, loginDto.Password, false, false);
 
         //        if (!result.Succeeded)
         //            return Unauthorized(loginDto);

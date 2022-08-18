@@ -22,7 +22,7 @@ namespace HotelListing
                     rollingInterval: RollingInterval.Day,
                     restrictedToMinimumLevel: LogEventLevel.Information
                 ).CreateLogger();
-
+            
             try
             {
                 Log.Information("Application is Starting");
