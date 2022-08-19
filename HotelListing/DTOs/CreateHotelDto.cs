@@ -9,7 +9,7 @@ namespace HotelListing.DTOs
         public string Name { get; set; }
 
         [Required]
-        [StringLength(maximumLength: 250, ErrorMessage = "Address is too Long")]
+        [StringLength(maximumLength: 450, ErrorMessage = "Address is too Long")]
         public string Address { get; set; }
 
         [Required]

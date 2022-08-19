@@ -16,9 +16,9 @@ namespace HotelListing.Data
         {
             base.OnModelCreating(builder);
 
-            builder.ApplyConfiguration(new RoleConfiguration());
             builder.ApplyConfiguration(new CountryConfiguration());
             builder.ApplyConfiguration(new HotelConfiguration());
+            builder.ApplyConfiguration(new RoleConfiguration());
         }
 
         public DbSet<Country> Countries { get; set; }

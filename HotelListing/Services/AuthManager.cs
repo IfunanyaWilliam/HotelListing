@@ -25,10 +25,10 @@ namespace HotelListing.Services
             _configuration = configuration;
         }
 
-        public async Task<string> CreateToken()
+        public async Task<string> CreateTokenAsync()
         {
             var signInCredentials = GetSigningCredentials();
-            var claims = await GetClaims();
+            var claims = await GetClaimsAsync();
             var tokenOpions = GenerateTokenOptions(signInCredentials, claims);
 
             return new JwtSecurityTokenHandler().WriteToken(tokenOpions);
@@ -47,11 +47,11 @@ namespace HotelListing.Services
                     expires: expiration,
                     signingCredentials: signingCredentials
                 );
-
+             
             return jwtSecurityToken;
         }
 
-        private async Task<List<Claim>> GetClaims()
+        private async Task<List<Claim>> GetClaimsAsync()
         {
             var claims = new List<Claim>
             {
@@ -76,10 +76,10 @@ namespace HotelListing.Services
             return new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
         }
 
-        public async Task<bool> ValidateUser(LoginDto userDto)
+        public async Task<bool> ValidateUserAsync(LoginDto loginDto)
         {
-            _user = await _userManager.FindByNameAsync(userDto.Email);
-            var userPassword = await _userManager.CheckPasswordAsync(_user, userDto.Password);
+            _user = await _userManager.FindByNameAsync(loginDto.Email);
+            var userPassword = await _userManager.CheckPasswordAsync(_user, loginDto.Password);
             return (_user != null && userPassword);
         }
     }

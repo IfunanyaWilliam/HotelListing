@@ -8,7 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Text;
 
-namespace HotelListing.Services
+namespace HotelListing
 {
     public static class ServiceExtensions
     {
@@ -43,3 +43,4 @@ namespace HotelListing.Services
         }
     }
 }
+

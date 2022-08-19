@@ -8,6 +8,6 @@ namespace HotelListing.Contracts
     {
         IGenericRepository<Country> Countries { get; }
         IGenericRepository<Hotel> Hotels { get; }
-        Task Save();
+        Task SaveAsync();
     }
 }

@@ -1,10 +1,12 @@
 using HotelListing.Contracts;
 using HotelListing.Data;
+using HotelListing.Models;
 using HotelListing.Repository;
 using HotelListing.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -45,10 +47,11 @@ namespace HotelListing
             services.AddAuthentication();
 
             //bring in the ServiceExtension class
-            services.ConfigureIdentity();
+            ServiceExtensions.ConfigureIdentity(services);
+            //services.ConfigureIdentity();
 
-            //ServiceExtensions.ConfigureJWT(services, Configuration);
-            services.ConfigureJWT(Configuration);
+            ServiceExtensions.ConfigureJWT(services, Configuration);
+            //services.ConfigureJWT(Configuration);
 
             
 
@@ -129,6 +132,8 @@ namespace HotelListing
             app.UseCors("CorsPolicy");
 
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

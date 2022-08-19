@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using HotelListing.Contracts;
 using HotelListing.DTOs;
 using HotelListing.Models;
 using Microsoft.AspNetCore.Http;
@@ -15,19 +16,20 @@ namespace HotelListing.Controllers
     public class AccountController : ControllerBase
     {
         private readonly UserManager<ApiUser> _userManager;
-        //private readonly SignInManager<ApiUser> _signInManager;
         private readonly ILogger<AccountController> _logger;
         private readonly IMapper _mapper;
+        private readonly IAuthManager _authManager;
 
         public AccountController(UserManager<ApiUser> userManager,
-                                 //SignInManager<ApiUser> signInManager,
                                  ILogger<AccountController> logger,
-                                 IMapper mapper)
+                                 IMapper mapper,
+                                 IAuthManager authManager)
         {
             _userManager = userManager;
             //_signInManager = signInManager;
             _logger = logger;
             _mapper = mapper;
+            _authManager = authManager;
         }
 
         [HttpPost]
@@ -67,29 +69,30 @@ namespace HotelListing.Controllers
             }
         }
 
-        //[HttpPost]
-        //[Route("login")]
-        //public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
-        //{
-        //    _logger.LogInformation($"Login Attempt for {loginDto.Email}");
+        [HttpPost]
+        [Route("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+        {
+            _logger.LogInformation($"Login Attempt for {loginDto.Email}");
 
-        //    if (!ModelState.IsValid)
-        //        return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-        //    try
-        //    {
-        //        var result = await _signInManager.PasswordSignInAsync(loginDto.Email, loginDto.Password, false, false);
+            try
+            {
+                var authorize = await _authManager.ValidateUserAsync(loginDto);
+                if(!authorize)
+                {
+                    return Unauthorized();
+                }    
 
-        //        if (!result.Succeeded)
-        //            return Unauthorized(loginDto);
-
-        //        return Accepted();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, $"Something went wrong in the {nameof(Login)}");
-        //        return Problem($"Something went wrong in the {nameof(Register)}", statusCode: 500);
-        //    }
-        //}
+                return Accepted(new { Token = await _authManager.CreateTokenAsync() });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Something went wrong in the {nameof(Login)}");
+                return Problem($"Something went wrong in the {nameof(Register)}", statusCode: 500);
+            }
+        }
     }
 }
