@@ -43,7 +43,7 @@ namespace HotelListing.Controllers
             }
         }
 
-        [HttpGet("countryId")]
+        [HttpGet("countryId", Name = "GetCountry")]
         public async Task<IActionResult> GetCountry(int countryId)
         {
             try
@@ -55,6 +55,42 @@ namespace HotelListing.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Something went wrong in the {nameof(GetCountry)}");
+                return StatusCode(500, "Inernal server Error. Please try agian later.");
+            }
+        }
+
+
+        //[Authorize]
+        [HttpPut("{countryId:int}")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateCountry(int countryId, [FromBody] UpdateCountryDto countryDto)
+        {
+            if (!ModelState.IsValid || countryId < 1)
+            {
+                _logger.LogError($"Invalid POST attemp in {nameof(UpdateCountry)}");
+                return BadRequest(ModelState);
+            }
+
+
+            try
+            {
+                var countryToUpdate = await _uniitOfWork.Countries.GetAsync(i => i.Id == countryId);
+                if (countryToUpdate == null)
+                {
+                    _logger.LogError($"Invalid POST attemp in {nameof(UpdateCountry)}");
+                    return BadRequest("Country not Found");
+                }
+
+                _mapper.Map(countryDto, countryToUpdate);
+                _uniitOfWork.Countries.Update(countryToUpdate);
+                await _uniitOfWork.SaveAsync();
+
+                return CreatedAtRoute("GetCountry", new { countryId = countryToUpdate.Id }, countryToUpdate);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Something went wrong in the {nameof(UpdateCountry)}");
                 return StatusCode(500, "Inernal server Error. Please try agian later.");
             }
         }
