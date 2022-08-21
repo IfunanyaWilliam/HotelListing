@@ -95,5 +95,45 @@ namespace HotelListing.Controllers
             }
         }
 
+
+        [HttpDelete("{countryId:int}")]
+        [ProducesDefaultResponseType]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> DeleteCountry(int countryId)
+        {
+            if (countryId < 1)
+            {
+                _logger.LogError($"Invalid Delete attempt in {nameof(DeleteCountry)}");
+                return BadRequest();
+            }
+
+            try
+            {
+                var country = await _uniitOfWork.Hotels.GetAsync(i => i.Id == countryId);
+                if (country == null)
+                {
+                    _logger.LogError($"CountryId does not match any Hotel in {nameof(DeleteCountry)}");
+                    return BadRequest("Country not Found");
+                }
+
+                //Delete all hotels associated with country
+                var hotels = await _uniitOfWork.Hotels.GetAllAsync( c => c.CountryId == countryId);
+                _uniitOfWork.Hotels.DeleteRange(hotels);
+
+                //Finally delete country
+                await _uniitOfWork.Countries.DeleteAsync(countryId);
+                await _uniitOfWork.SaveAsync();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Something went wrong in the {nameof(DeleteCountry)}");
+                return StatusCode(500, "Inernal server Error. Please try agian later.");
+            }
+
+        }
     }
 }

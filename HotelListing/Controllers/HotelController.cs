@@ -48,7 +48,7 @@ namespace HotelListing.Controllers
             }
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpGet("{hotelId:int}", Name = "GetHotel")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -56,7 +56,7 @@ namespace HotelListing.Controllers
         {
             try
             {
-                var hotel = await _uniitOfWork.Hotels.GetAsync(i => i.Id == hotelId, new List<string> { "Country"});
+                var hotel = await _uniitOfWork.Hotels.GetAsync(i => i.Id == hotelId, new List<string> { "Country" });
                 var hotelMap = _mapper.Map<HotelDto>(hotel);
                 return Ok(hotelMap);
             }
@@ -67,7 +67,7 @@ namespace HotelListing.Controllers
             }
         }
 
-        [Authorize(Roles = "Administrator")]
+        //[Authorize(Roles = "Administrator")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -130,5 +130,41 @@ namespace HotelListing.Controllers
                 return StatusCode(500, "Inernal server Error. Please try agian later.");
             }
         }
+
+        [HttpDelete("{hotelId:int}")]
+        [ProducesDefaultResponseType]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> DeleteHotel(int hotelId)
+        {
+            if (hotelId < 1)
+            {
+                _logger.LogError($"Invalid Delete attempt in {nameof(DeleteHotel)}");
+                return BadRequest();
+            }
+
+            try
+            {
+                var hotel = await _uniitOfWork.Hotels.GetAsync(i => i.Id == hotelId);
+                if (hotel == null)
+                {
+                    _logger.LogError($"hotelId does not match any Hotel in {nameof(DeleteHotel)}");
+                    return BadRequest("Hotel not Found");
+                }
+
+                await _uniitOfWork.Hotels.DeleteAsync(hotelId);
+                await _uniitOfWork.SaveAsync();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Something went wrong in the {nameof(DeleteHotel)}");
+                return StatusCode(500, "Inernal server Error. Please try agian later.");
+            }
+
+        }
+
     }
 }
