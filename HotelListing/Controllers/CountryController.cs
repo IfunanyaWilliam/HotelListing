@@ -29,11 +29,11 @@ namespace HotelListing.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetCountries()
+        public async Task<IActionResult> GetCountries([FromQuery] RequestParams requestParams)
         {
             try
             {
-                var countries = await _uniitOfWork.Countries.GetAllAsync();
+                var countries = await _uniitOfWork.Countries.GetPagedListAsync(requestParams);
                 var countriesMap = _mapper.Map<IList<CountryDto>>(countries);
                 return Ok(countriesMap);
             }
