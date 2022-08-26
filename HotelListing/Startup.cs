@@ -44,6 +44,10 @@ namespace HotelListing
            services.AddHttpContextAccessor();
            //services.ConfigureHttpCacheHeaders();
 
+            services.AddResponseCaching();
+
+            services.ConfigureHttpCacheHeaders();
+
             services.AddAuthentication();
 
             //bring in the ServiceExtension class
@@ -54,8 +58,10 @@ namespace HotelListing
             services.ConfigureJWT(Configuration);
 
             
-
-            services.AddControllers();
+            services.AddControllers(config =>
+            {
+                config.CacheProfiles.Add("120SecondsDuration", new CacheProfile { Duration = 120 });
+            });
 
             //Add configuration for Cores
             services.AddCors(o =>
@@ -70,13 +76,12 @@ namespace HotelListing
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IAuthManager, AuthManager>();
 
-            
-
             AddSwaggerDoc(services);
-            //services.ConfigureVersioning();
+
+            services.ConfigureVersioning();
 
             //services.AddControllers()
-            //        .AddNewtonsoftJson(op => 
+            //        .AddNewtonsoftJson(op =>
             //            op.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
         }
 
@@ -132,6 +137,9 @@ namespace HotelListing
             app.UseHttpsRedirection();
 
             app.UseCors("CorsPolicy");
+
+            app.UseResponseCaching();
+            app.UseHttpCacheHeaders();
 
             app.UseRouting();
 

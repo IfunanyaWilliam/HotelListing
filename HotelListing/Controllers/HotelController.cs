@@ -35,17 +35,9 @@ namespace HotelListing.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetHotels()
         {
-            try
-            {
-                var hotels = await _uniitOfWork.Hotels.GetAllAsync();
-                var hotelsMap = _mapper.Map<IList<HotelDto>>(hotels);
-                return Ok(hotelsMap);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong in the {nameof(GetHotels)}");
-                return StatusCode(500, "Inernal server Error. Please try agian later.");
-            }
+            var hotels = await _uniitOfWork.Hotels.GetAllAsync();
+            var hotelsMap = _mapper.Map<IList<HotelDto>>(hotels);
+            return Ok(hotelsMap);
         }
 
         //[Authorize]
@@ -54,17 +46,9 @@ namespace HotelListing.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetHotel(int hotelId)
         {
-            try
-            {
-                var hotel = await _uniitOfWork.Hotels.GetAsync(i => i.Id == hotelId, new List<string> { "Country" });
-                var hotelMap = _mapper.Map<HotelDto>(hotel);
-                return Ok(hotelMap);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong in the {nameof(GetHotel)}");
-                return StatusCode(500, "Inernal server Error. Please try agian later.");
-            }
+            var hotel = await _uniitOfWork.Hotels.GetAsync(i => i.Id == hotelId, new List<string> { "Country" });
+            var hotelMap = _mapper.Map<HotelDto>(hotel);
+            return Ok(hotelMap);
         }
 
         //[Authorize(Roles = "Administrator")]
@@ -79,21 +63,12 @@ namespace HotelListing.Controllers
                 _logger.LogError($"Invalid POST attemp in {nameof(CreateHotel)}");
                 return BadRequest(ModelState);
             }
-                
 
-            try
-            {
-                var hotel = _mapper.Map<Hotel>(hotelDto);
-                await _uniitOfWork.Hotels.InsertAsync(hotel);
-                await _uniitOfWork.SaveAsync();
+            var hotel = _mapper.Map<Hotel>(hotelDto);
+            await _uniitOfWork.Hotels.InsertAsync(hotel);
+            await _uniitOfWork.SaveAsync();
 
-                return CreatedAtRoute("GetHotel", new { hotelId = hotel.Id }, hotel);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong in the {nameof(CreateHotel)}");
-                return StatusCode(500, "Inernal server Error. Please try agian later.");
-            }
+            return CreatedAtRoute("GetHotel", new { hotelId = hotel.Id }, hotel);
         }
 
         //[Authorize]
@@ -108,27 +83,18 @@ namespace HotelListing.Controllers
                 return BadRequest(ModelState);
             }
 
-
-            try
+            var hotelToUpdate = await _uniitOfWork.Hotels.GetAsync(i => i.Id == hotelId);
+            if (hotelToUpdate == null)
             {
-                var hotelToUpdate = await _uniitOfWork.Hotels.GetAsync(i => i.Id == hotelId);
-                if(hotelToUpdate == null)
-                {
-                    _logger.LogError($"Invalid POST attemp in {nameof(UpdateHotel)}");
-                    return BadRequest("Hotel not Found");
-                }
-
-                _mapper.Map(hotelDto, hotelToUpdate);
-                _uniitOfWork.Hotels.Update(hotelToUpdate);
-                await _uniitOfWork.SaveAsync();
-
-                return CreatedAtRoute("GetHotel", new { hotelId = hotelToUpdate.Id }, hotelToUpdate);
+                _logger.LogError($"Invalid POST attemp in {nameof(UpdateHotel)}");
+                return BadRequest("Hotel not Found");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong in the {nameof(UpdateHotel)}");
-                return StatusCode(500, "Inernal server Error. Please try agian later.");
-            }
+
+            _mapper.Map(hotelDto, hotelToUpdate);
+            _uniitOfWork.Hotels.Update(hotelToUpdate);
+            await _uniitOfWork.SaveAsync();
+
+            return CreatedAtRoute("GetHotel", new { hotelId = hotelToUpdate.Id }, hotelToUpdate);
         }
 
         [HttpDelete("{hotelId:int}")]
@@ -144,26 +110,17 @@ namespace HotelListing.Controllers
                 return BadRequest();
             }
 
-            try
+            var hotel = await _uniitOfWork.Hotels.GetAsync(i => i.Id == hotelId);
+            if (hotel == null)
             {
-                var hotel = await _uniitOfWork.Hotels.GetAsync(i => i.Id == hotelId);
-                if (hotel == null)
-                {
-                    _logger.LogError($"hotelId does not match any Hotel in {nameof(DeleteHotel)}");
-                    return BadRequest("Hotel not Found");
-                }
-
-                await _uniitOfWork.Hotels.DeleteAsync(hotelId);
-                await _uniitOfWork.SaveAsync();
-
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong in the {nameof(DeleteHotel)}");
-                return StatusCode(500, "Inernal server Error. Please try agian later.");
+                _logger.LogError($"hotelId does not match any Hotel in {nameof(DeleteHotel)}");
+                return BadRequest("Hotel not Found");
             }
 
+            await _uniitOfWork.Hotels.DeleteAsync(hotelId);
+            await _uniitOfWork.SaveAsync();
+
+            return NoContent();
         }
 
     }

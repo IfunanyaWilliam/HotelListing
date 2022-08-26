@@ -2,6 +2,7 @@
 using HotelListing.Contracts;
 using HotelListing.DTOs;
 using HotelListing.Models;
+using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -29,6 +30,8 @@ namespace HotelListing.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetCountries([FromQuery] RequestParams requestParams)
         {
             var countries = await _uniitOfWork.Countries.GetPagedListAsync(requestParams);
@@ -37,6 +40,11 @@ namespace HotelListing.Controllers
         }
 
         [HttpGet("countryId", Name = "GetCountry")]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge =  60)]
+        [HttpCacheValidation(MustRevalidate = false)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetCountry(int countryId)
         {
             var country = await _uniitOfWork.Countries.GetAsync(i => i.Id == countryId, new List<string> { "Hotels" });
