@@ -19,7 +19,7 @@ namespace HotelListing.Controllers
         private readonly IMapper _mapper;
         private readonly ILogger<CountryController> _logger;
 
-        public CountryController(IUnitOfWork uniitOfWork, 
+        public CountryController(IUnitOfWork uniitOfWork,
                                  IMapper mapper,
                                  ILogger<CountryController> logger)
         {
@@ -31,33 +31,17 @@ namespace HotelListing.Controllers
         [HttpGet]
         public async Task<IActionResult> GetCountries([FromQuery] RequestParams requestParams)
         {
-            try
-            {
-                var countries = await _uniitOfWork.Countries.GetPagedListAsync(requestParams);
-                var countriesMap = _mapper.Map<IList<CountryDto>>(countries);
-                return Ok(countriesMap);
-            }
-            catch(Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong in the {nameof(GetCountries)}");
-                return StatusCode(500, "Inernal server Error. Please try agian later.");
-            }
+            var countries = await _uniitOfWork.Countries.GetPagedListAsync(requestParams);
+            var countriesMap = _mapper.Map<IList<CountryDto>>(countries);
+            return Ok(countriesMap);
         }
 
         [HttpGet("countryId", Name = "GetCountry")]
         public async Task<IActionResult> GetCountry(int countryId)
         {
-            try
-            {
-                var country = await _uniitOfWork.Countries.GetAsync(i => i.Id == countryId, new List<string> { "Hotels"} );
-                var countryMap = _mapper.Map<CountryDto>(country);
-                return Ok(countryMap);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong in the {nameof(GetCountry)}");
-                return StatusCode(500, "Inernal server Error. Please try agian later.");
-            }
+            var country = await _uniitOfWork.Countries.GetAsync(i => i.Id == countryId, new List<string> { "Hotels" });
+            var countryMap = _mapper.Map<CountryDto>(country);
+            return Ok(countryMap);
         }
 
 
@@ -74,20 +58,11 @@ namespace HotelListing.Controllers
                 return BadRequest(ModelState);
             }
 
+            var country = _mapper.Map<Country>(countryDto);
+            await _uniitOfWork.Countries.InsertAsync(country);
+            await _uniitOfWork.SaveAsync();
 
-            try
-            {
-                var country = _mapper.Map<Country>(countryDto);
-                await _uniitOfWork.Countries.InsertAsync(country);
-                await _uniitOfWork.SaveAsync();
-
-                return CreatedAtRoute("GetCountry", new { countryId = country.Id }, country);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong in the {nameof(CreateCountry)}");
-                return StatusCode(500, "Inernal server Error. Please try agian later.");
-            }
+            return CreatedAtRoute("GetCountry", new { countryId = country.Id }, country);
         }
 
 
@@ -103,27 +78,18 @@ namespace HotelListing.Controllers
                 return BadRequest(ModelState);
             }
 
-
-            try
+            var countryToUpdate = await _uniitOfWork.Countries.GetAsync(i => i.Id == countryId);
+            if (countryToUpdate == null)
             {
-                var countryToUpdate = await _uniitOfWork.Countries.GetAsync(i => i.Id == countryId);
-                if (countryToUpdate == null)
-                {
-                    _logger.LogError($"Invalid POST attemp in {nameof(UpdateCountry)}");
-                    return BadRequest("Country not Found");
-                }
-
-                _mapper.Map(countryDto, countryToUpdate);
-                _uniitOfWork.Countries.Update(countryToUpdate);
-                await _uniitOfWork.SaveAsync();
-
-                return CreatedAtRoute("GetCountry", new { countryId = countryToUpdate.Id }, countryToUpdate);
+                _logger.LogError($"Invalid POST attemp in {nameof(UpdateCountry)}");
+                return BadRequest("Country not Found");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong in the {nameof(UpdateCountry)}");
-                return StatusCode(500, "Inernal server Error. Please try agian later.");
-            }
+
+            _mapper.Map(countryDto, countryToUpdate);
+            _uniitOfWork.Countries.Update(countryToUpdate);
+            await _uniitOfWork.SaveAsync();
+
+            return CreatedAtRoute("GetCountry", new { countryId = countryToUpdate.Id }, countryToUpdate);
         }
 
 
@@ -140,31 +106,22 @@ namespace HotelListing.Controllers
                 return BadRequest();
             }
 
-            try
+            var country = await _uniitOfWork.Hotels.GetAsync(i => i.Id == countryId);
+            if (country == null)
             {
-                var country = await _uniitOfWork.Hotels.GetAsync(i => i.Id == countryId);
-                if (country == null)
-                {
-                    _logger.LogError($"CountryId does not match any Hotel in {nameof(DeleteCountry)}");
-                    return BadRequest("Country not Found");
-                }
-
-                //Delete all hotels associated with country
-                var hotels = await _uniitOfWork.Hotels.GetAllAsync( c => c.CountryId == countryId);
-                _uniitOfWork.Hotels.DeleteRange(hotels);
-
-                //Finally delete country
-                await _uniitOfWork.Countries.DeleteAsync(countryId);
-                await _uniitOfWork.SaveAsync();
-
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Something went wrong in the {nameof(DeleteCountry)}");
-                return StatusCode(500, "Inernal server Error. Please try agian later.");
+                _logger.LogError($"CountryId does not match any Hotel in {nameof(DeleteCountry)}");
+                return BadRequest("Country not Found");
             }
 
+            //Delete all hotels associated with country
+            var hotels = await _uniitOfWork.Hotels.GetAllAsync(c => c.CountryId == countryId);
+            _uniitOfWork.Hotels.DeleteRange(hotels);
+
+            //Finally delete country
+            await _uniitOfWork.Countries.DeleteAsync(countryId);
+            await _uniitOfWork.SaveAsync();
+
+            return NoContent();
         }
     }
 }

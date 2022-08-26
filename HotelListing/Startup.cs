@@ -47,11 +47,11 @@ namespace HotelListing
             services.AddAuthentication();
 
             //bring in the ServiceExtension class
-            ServiceExtensions.ConfigureIdentity(services);
-            //services.ConfigureIdentity();
+            //ServiceExtensions.ConfigureIdentity(services);
+            services.ConfigureIdentity();
 
-            ServiceExtensions.ConfigureJWT(services, Configuration);
-            //services.ConfigureJWT(Configuration);
+            //ServiceExtensions.ConfigureJWT(services, Configuration);
+            services.ConfigureJWT(Configuration);
 
             
 
@@ -126,6 +126,8 @@ namespace HotelListing
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "HotelListing v1"));
             }
+
+            app.ConfigureExceptionHandler();
 
             app.UseHttpsRedirection();
 
