@@ -30,6 +30,7 @@ namespace HotelListing.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetCountries([FromQuery] RequestParams requestParams)

@@ -1,4 +1,5 @@
-﻿using HotelListing.Data;
+﻿using AspNetCoreRateLimit;
+using HotelListing.Data;
 using HotelListing.Models;
 using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -12,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace HotelListing
@@ -90,10 +92,31 @@ namespace HotelListing
                     expirationOpt.CacheLocation = CacheLocation.Private;
                 },
                 (validationOpt) =>
-                { 
+                {
                     validationOpt.MustRevalidate = true;
                 }
            );
+        }
+        public static void ConfigureRateLimiting(this IServiceCollection services)
+        {
+            var rateLimitRule = new List<RateLimitRule>
+            {
+                new RateLimitRule
+                {
+                    Endpoint = "*",
+                    Limit    = 1,
+                    Period   = "5s"
+                }
+            };
+
+            services.Configure<IpRateLimitOptions>(opt =>
+            {
+                opt.GeneralRules = rateLimitRule;
+            });
+            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+            services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
+            services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+            services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
         }
     }
 }

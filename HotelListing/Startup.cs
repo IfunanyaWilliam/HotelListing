@@ -1,3 +1,4 @@
+using AspNetCoreRateLimit;
 using HotelListing.Contracts;
 using HotelListing.Data;
 using HotelListing.Models;
@@ -40,9 +41,8 @@ namespace HotelListing
 
             services.AddMemoryCache();
 
-           //services.C
-           services.AddHttpContextAccessor();
-           //services.ConfigureHttpCacheHeaders();
+            services.ConfigureRateLimiting();
+            services.AddHttpContextAccessor();
 
             services.AddResponseCaching();
 
@@ -57,7 +57,7 @@ namespace HotelListing
             //ServiceExtensions.ConfigureJWT(services, Configuration);
             services.ConfigureJWT(Configuration);
 
-            
+
             services.AddControllers(config =>
             {
                 config.CacheProfiles.Add("120SecondsDuration", new CacheProfile { Duration = 120 });
@@ -140,6 +140,7 @@ namespace HotelListing
 
             app.UseResponseCaching();
             app.UseHttpCacheHeaders();
+            app.UseIpRateLimiting();
 
             app.UseRouting();
 
